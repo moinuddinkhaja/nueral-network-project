@@ -14,7 +14,7 @@ st.title("Neural Network Playground")
 
 def get_dataset(name_or_file):
     # Base URL for raw content in GitHub repository
-    base_url = "https://raw.githubusercontent.com/ksiva0/Neural_Network_Playground/main/datasets/"
+    base_url = "https://github.com/moinuddinkhaja/nueral-network-project/tree/main/datasab"
     
     file_paths = {
         "ushape": "1.ushape.csv",
