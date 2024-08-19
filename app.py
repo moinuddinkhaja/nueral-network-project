@@ -5,7 +5,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 import tensorflow as tf
 from tensorflow.keras.models import Sequential  # type: ignore
-from tensorflow.keras.layers import Dense # type: ignore
+from tensorflow.keras.layers import Dense  # type: ignore
 from mlxtend.plotting import plot_decision_regions
 import matplotlib.pyplot as plt
 
@@ -14,7 +14,7 @@ st.title("Neural Network Playground")
 
 def get_dataset(name_or_file):
     # Base URL for raw content in GitHub repository
-    base_url = "https://github.com/ksiva0/Neural_Network_Playground/tree/main/datasets"
+    base_url = "https://raw.githubusercontent.com/ksiva0/Neural_Network_Playground/main/datasets/"
     
     file_paths = {
         "ushape": "1.ushape.csv",
@@ -28,10 +28,28 @@ def get_dataset(name_or_file):
         "random": "9.random.csv"
     }
     
-
-    X = data.iloc[:, 0:2].values
-    y = data.iloc[:, -1].values
-    return X, y
+    if name_or_file in file_paths:
+        try:
+            url = base_url + file_paths[name_or_file]
+            data = pd.read_csv(url, header=None)
+            X = data.iloc[:, :-1].values
+            y = data.iloc[:, -1].values
+            return X, y
+        except Exception as e:
+            st.error(f"Error loading dataset: {e}")
+            return None, None
+    elif hasattr(name_or_file, 'read'):
+        try:
+            data = pd.read_csv(name_or_file, header=None)
+            X = data.iloc[:, :-1].values
+            y = data.iloc[:, -1].values
+            return X, y
+        except Exception as e:
+            st.error(f"Error reading uploaded file: {e}")
+            return None, None
+    else:
+        st.error(f"Dataset name not recognized: {name_or_file}")
+        return None, None
 
 def create_model(input_dim, learning_rate, activation, num_layers, num_neurons, regularization, reg_rate, problem_type):
     model = Sequential()
@@ -42,6 +60,9 @@ def create_model(input_dim, learning_rate, activation, num_layers, num_neurons, 
         elif regularization == "L2":
             model.add(Dense(num_neurons, input_dim=input_dim, activation=activation, 
                             kernel_regularizer=tf.keras.regularizers.l2(reg_rate)))
+        elif regularization == "L1 & L2":
+            model.add(Dense(num_neurons, input_dim=input_dim, activation=activation, 
+                            kernel_regularizer=tf.keras.regularizers.l1_l2(l1=reg_rate, l2=reg_rate)))
         else:
             model.add(Dense(num_neurons, input_dim=input_dim, activation=activation))
         input_dim = num_neurons
@@ -58,7 +79,7 @@ def create_model(input_dim, learning_rate, activation, num_layers, num_neurons, 
     return model
 
 st.sidebar.title("Neural Network Configuration")
-dataset_name = st.sidebar.selectbox("Select Dataset", ["ushape", "concerticcir1", "concertriccir2", "linearsep", "outlier", "overlap", "xor", "twospirals", "random"])
+dataset_name = st.sidebar.selectbox("Select Dataset", ["ushape", "concentriccir1", "concentriccir2", "linearsep", "outlier", "overlap", "xor", "twospirals", "random"])
 problem_type = st.sidebar.selectbox("Problem Type", ["Classification", "Regression"])
 train_test_ratio = st.sidebar.slider("Ratio of Training to Test Data", 0.1, 0.9, 0.8)
 noise_level = st.sidebar.slider("Noise Level", 0.0, 1.0, 0.0)
@@ -91,7 +112,7 @@ if st.sidebar.button("Submit"):
             st.write(f"Test Loss: {loss:.4f}, Test MSE: {mse:.4f}")
 
         plt.figure(figsize=(10, 6))
-        plot_decision_regions(X_test, y_test.astype(np.integer), clf=model)
+        plot_decision_regions(X_test, y_test.astype(np.int32), clf=model, legend=2)
         plt.title(f"Decision Boundary for {dataset_name} Dataset")
         st.pyplot(plt)
 
