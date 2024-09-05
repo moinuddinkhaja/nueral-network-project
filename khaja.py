@@ -15,34 +15,21 @@ st.set_page_config(page_title="A Neural Network Playground", page_icon="🍭")
 # Set the title of the web page
 st.title(":rainbow[Tinker With a Neural Network Right Here in Your Browser. Don’t Worry, You Can’t Break It. We Promise.]")
 
-# Function to create datasets
-def get_dataset(name):
-    if name == "ushape":
-        data = pd.read_csv(r"C:\Users\madas\Downloads\Multiple CSV\Multiple CSV\1.ushape.csv", header=None)
-    elif name == "concerticcir1":
-        data = pd.read_csv(r"C:\Users\madas\Downloads\Multiple CSV\Multiple CSV\2.concerticcir1.csv", header=None)
-    elif name == "concertriccir2":
-        data = pd.read_csv(r"C:\Users\madas\Downloads\Multiple CSV\Multiple CSV\3.concertriccir2.csv", header=None)
-    elif name == "linearsep":
-        data = pd.read_csv(r"C:\Users\madas\Downloads\Multiple CSV\Multiple CSV\4.linearsep.csv", header=None)
-    elif name == "outlier":
-        data = pd.read_csv(r"C:\Users\madas\Downloads\Multiple CSV\Multiple CSV\5.outlier.csv", header=None)
-    elif name == "overlap":
-        data = pd.read_csv(r"C:\Users\madas\Downloads\Multiple CSV\Multiple CSV\6.overlap.csv", header=None)
-    elif name == "xor":
-        data = pd.read_csv(r"C:\Users\madas\Downloads\Multiple CSV\Multiple CSV\7.xor.csv", header=None)
-    elif name == "twospirals":
-        data = pd.read_csv(r"C:\Users\madas\Downloads\Multiple CSV\Multiple CSV\8.twospirals.csv", header=None)
-    elif name == "random":
-        data = pd.read_csv(r"C:\Users\madas\Downloads\Multiple CSV\Multiple CSV\9.random.csv", header=None)
-    else:
-        return None, None
+def get_dataset(name_or_file):
+    # Base URL for raw content in GitHub repository
+    base_url = "https://github.com/moinuddinkhaja/nueral-network-project/tree/main/datasab"
     
-    # Assuming the last column is the label
-    X = data.iloc[:, :-1].values
-    y = data.iloc[:, -1].values
-    return X, y
-
+    file_paths = {
+        "ushape": "1.ushape.csv",
+        "concentriccir1": "2.concentriccir1.csv",
+        "concentriccir2": "3.concentriccir2.csv",
+        "linearsep": "4.linearsep.csv",
+        "outlier": "5.outlier.csv",
+        "overlap": "6.overlap.csv",
+        "xor": "7.xor.csv",
+        "twospirals": "8.twospirals.csv",
+        "random": "9.random.csv"
+    }
 # Function to create and compile a neural network model
 def create_model(input_dim, learning_rate, activation, num_layers, num_neurons, regularization, reg_rate, problem_type):
     model = Sequential()
