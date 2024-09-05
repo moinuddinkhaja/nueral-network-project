@@ -4,8 +4,8 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 import tensorflow as tf
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense
+from tensorflow.keras.models import Sequential 
+from tensorflow.keras.layers import Dense 
 from mlxtend.plotting import plot_decision_regions
 import matplotlib.pyplot as plt
 
@@ -15,8 +15,8 @@ st.set_page_config(page_title="A Neural Network Playground", page_icon="🍭")
 # Set the title of the web page
 st.title(":rainbow[Tinker With a Neural Network Right Here in Your Browser. Don’t Worry, You Can’t Break It. We Promise.]")
 
-# Function to fetch datasets from GitHub repository
-def get_dataset(name):
+# Function to fetch datasets from GitHub repository or uploaded by user
+def get_dataset(name_or_file):
     # Base URL for raw content in GitHub repository
     base_url = "https://raw.githubusercontent.com/moinuddinkhaja/nueral-network-project/main/datasab/"
     
@@ -32,15 +32,18 @@ def get_dataset(name):
         "random": "9.random.csv"
     }
     
-    if name in file_paths:
-        # Use the raw GitHub URL for each dataset
-        url = base_url + file_paths[name]
-        data = pd.read_csv(url, header=None)
-        X = data.iloc[:, :-1].values
-        y = data.iloc[:, -1].values
-        return X, y
+    if isinstance(name_or_file, str):
+        if name_or_file in file_paths:
+            url = base_url + file_paths[name_or_file]
+            data = pd.read_csv(url, header=None)
+        else:
+            return None, None
     else:
-        return None, None
+        data = pd.read_csv(name_or_file, header=None)
+
+    X = data.iloc[:, :-1].values
+    y = data.iloc[:, -1].values
+    return X, y
 
 # Function to create and compile a neural network model
 def create_model(input_dim, learning_rate, activation, num_layers, num_neurons, regularization, reg_rate, problem_type):
@@ -69,7 +72,17 @@ def create_model(input_dim, learning_rate, activation, num_layers, num_neurons, 
 
 # Sidebar for dataset selection and model configuration
 st.sidebar.title("Neural Network Configuration")
-dataset_name = st.sidebar.selectbox("Select Dataset", ["ushape", "concentriccir1", "concentriccir2", "linearsep", "outlier", "overlap", "xor", "twospirals", "random"])
+
+# Dataset selection: select from GitHub or upload a file
+upload_option = st.sidebar.radio("Choose dataset source", ["Select from GitHub", "Upload a file"])
+
+if upload_option == "Select from GitHub":
+    dataset_name = st.sidebar.selectbox("Select Dataset", ["ushape", "concentriccir1", "concentriccir2", "linearsep", "outlier", "overlap", "xor", "twospirals", "random"])
+    uploaded_file = None
+else:
+    uploaded_file = st.sidebar.file_uploader("Upload your dataset (CSV)", type=["csv"])
+    dataset_name = None
+
 problem_type = st.sidebar.selectbox("Problem Type", ["Classification", "Regression"])
 train_test_ratio = st.sidebar.slider("Ratio of Training to Test Data", 0.1, 0.9, 0.8)
 noise_level = st.sidebar.slider("Noise Level", 0.0, 1.0, 0.0)
@@ -82,9 +95,16 @@ epochs = st.sidebar.slider("Epochs", 1, 1000, 100)
 regularization = st.sidebar.selectbox("Regularization", ["None", "L1", "L2"])
 reg_rate = st.sidebar.slider("Regularization Rate", 0.0, 1.0, 0.0)
 
-# When the user submits the form
+# Button to trigger the model building and training process
 if st.sidebar.button("Submit"):
-    X, y = get_dataset(dataset_name)
+    # Load dataset based on the user's choice
+    if dataset_name:
+        X, y = get_dataset(dataset_name)
+    elif uploaded_file:
+        X, y = get_dataset(uploaded_file)
+    else:
+        st.write("Please select or upload a valid dataset.")
+        X, y = None, None
     
     if X is not None and y is not None:
         # Split the data
@@ -110,7 +130,7 @@ if st.sidebar.button("Submit"):
         # Plot decision regions
         plt.figure(figsize=(10, 6))
         plot_decision_regions(X_test, y_test.astype(np.integer), clf=model)
-        plt.title(f"Decision Boundary for {dataset_name} Dataset")
+        plt.title(f"Decision Boundary for Selected Dataset")
         st.pyplot(plt)
 
         # Plot training and validation loss
@@ -125,3 +145,4 @@ if st.sidebar.button("Submit"):
 
     else:
         st.write("Please select a valid dataset.")
+s
