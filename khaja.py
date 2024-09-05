@@ -3,11 +3,24 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+from sklearn.base import BaseEstimator, ClassifierMixin
 import tensorflow as tf
 from tensorflow.keras.models import Sequential 
 from tensorflow.keras.layers import Dense 
 from mlxtend.plotting import plot_decision_regions
 import matplotlib.pyplot as plt
+
+# Custom wrapper to make the Keras model compatible with scikit-learn
+class KerasClassifierWrapper(BaseEstimator, ClassifierMixin):
+    def __init__(self, model):
+        self.model = model
+
+    def fit(self, X, y):
+        self.model.fit(X, y, verbose=0)
+        return self
+
+    def predict(self, X):
+        return (self.model.predict(X) > 0.5).astype(int).ravel()
 
 # Set page configuration to full width
 st.set_page_config(page_title="A Neural Network Playground", page_icon="üç≠")
@@ -17,9 +30,7 @@ st.title(":rainbow[Tinker With a Neural Network Right Here in Your Browser. Don‚
 
 # Function to fetch datasets from GitHub repository or uploaded by user
 def get_dataset(name_or_file):
-    # Base URL for raw content in GitHub repository
     base_url = "https://raw.githubusercontent.com/moinuddinkhaja/nueral-network-project/main/datasab/"
-    
     file_paths = {
         "ushape": "1.ushape.csv",
         "concentriccir1": "2.concentriccir1.csv",
@@ -123,15 +134,19 @@ if st.sidebar.button("Submit"):
         if problem_type == "Classification":
             loss, accuracy = model.evaluate(X_test, y_test, verbose=0)
             st.write(f"Test Loss: {loss:.4f}, Test Accuracy: {accuracy:.4f}")
+            
+            # Wrapping Keras model for compatibility with plot_decision_regions
+            wrapper = KerasClassifierWrapper(model)
+            
+            # Plot decision regions
+            plt.figure(figsize=(10, 6))
+            plot_decision_regions(X_test, y_test.astype(np.integer), clf=wrapper)
+            plt.title(f"Decision Boundary for {dataset_name} Dataset")
+            st.pyplot(plt)
+
         else:
             loss, mse = model.evaluate(X_test, y_test, verbose=0)
             st.write(f"Test Loss: {loss:.4f}, Test MSE: {mse:.4f}")
-
-        # Plot decision regions
-        plt.figure(figsize=(10, 6))
-        plot_decision_regions(X_test, y_test.astype(np.integer), clf=model)
-        plt.title(f"Decision Boundary for Selected Dataset")
-        st.pyplot(plt)
 
         # Plot training and validation loss
         plt.figure(figsize=(10, 6))
@@ -145,4 +160,3 @@ if st.sidebar.button("Submit"):
 
     else:
         st.write("Please select a valid dataset.")
-s
