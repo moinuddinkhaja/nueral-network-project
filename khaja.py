@@ -111,7 +111,7 @@ if st.sidebar.button("Submit"):
     # Load dataset based on the user's choice
     if dataset_name:
         X, y = get_dataset(dataset_name)
-    elif uploaded_file:
+    elif uploaded_file is not None:
         X, y = get_dataset(uploaded_file)
     else:
         st.write("Please select or upload a valid dataset.")
@@ -141,7 +141,7 @@ if st.sidebar.button("Submit"):
             # Plot decision regions
             plt.figure(figsize=(10, 6))
             plot_decision_regions(X_test, y_test.astype(np.integer), clf=wrapper)
-            plt.title(f"Decision Boundary for {dataset_name} Dataset")
+            plt.title(f"Decision Boundary for {dataset_name if dataset_name else 'Uploaded'} Dataset")
             st.pyplot(plt)
 
         else:
