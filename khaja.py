@@ -4,8 +4,8 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 import tensorflow as tf
-from tensorflow.keras.models import Sequential 
-from tensorflow.keras.layers import Dense 
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
 from mlxtend.plotting import plot_decision_regions
 import matplotlib.pyplot as plt
 
@@ -15,9 +15,10 @@ st.set_page_config(page_title="A Neural Network Playground", page_icon="🍭")
 # Set the title of the web page
 st.title(":rainbow[Tinker With a Neural Network Right Here in Your Browser. Don’t Worry, You Can’t Break It. We Promise.]")
 
-def get_dataset(name_or_file):
+# Function to fetch datasets from GitHub repository
+def get_dataset(name):
     # Base URL for raw content in GitHub repository
-    base_url = "https://github.com/moinuddinkhaja/nueral-network-project/tree/main/datasab"
+    base_url = "https://raw.githubusercontent.com/moinuddinkhaja/nueral-network-project/main/datasab/"
     
     file_paths = {
         "ushape": "1.ushape.csv",
@@ -30,6 +31,16 @@ def get_dataset(name_or_file):
         "twospirals": "8.twospirals.csv",
         "random": "9.random.csv"
     }
+    
+    if name in file_paths:
+        url = base_url + file_paths[name]
+        data = pd.read_csv(url, header=None)
+        X = data.iloc[:, :-1].values
+        y = data.iloc[:, -1].values
+        return X, y
+    else:
+        return None, None
+
 # Function to create and compile a neural network model
 def create_model(input_dim, learning_rate, activation, num_layers, num_neurons, regularization, reg_rate, problem_type):
     model = Sequential()
@@ -57,7 +68,7 @@ def create_model(input_dim, learning_rate, activation, num_layers, num_neurons, 
 
 # Sidebar for dataset selection and model configuration
 st.sidebar.title("Neural Network Configuration")
-dataset_name = st.sidebar.selectbox("Select Dataset", ["ushape", "concerticcir1", "concertriccir2", "linearsep", "outlier", "overlap", "xor", "twospirals", "random"])
+dataset_name = st.sidebar.selectbox("Select Dataset", ["ushape", "concentriccir1", "concentriccir2", "linearsep", "outlier", "overlap", "xor", "twospirals", "random"])
 problem_type = st.sidebar.selectbox("Problem Type", ["Classification", "Regression"])
 train_test_ratio = st.sidebar.slider("Ratio of Training to Test Data", 0.1, 0.9, 0.8)
 noise_level = st.sidebar.slider("Noise Level", 0.0, 1.0, 0.0)
@@ -70,8 +81,10 @@ epochs = st.sidebar.slider("Epochs", 1, 1000, 100)
 regularization = st.sidebar.selectbox("Regularization", ["None", "L1", "L2"])
 reg_rate = st.sidebar.slider("Regularization Rate", 0.0, 1.0, 0.0)
 
+# When the user submits the form
 if st.sidebar.button("Submit"):
     X, y = get_dataset(dataset_name)
+    
     if X is not None and y is not None:
         # Split the data
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=1-train_test_ratio, random_state=42)
