@@ -33,6 +33,7 @@ def get_dataset(name):
     }
     
     if name in file_paths:
+        # Use the raw GitHub URL for each dataset
         url = base_url + file_paths[name]
         data = pd.read_csv(url, header=None)
         X = data.iloc[:, :-1].values
