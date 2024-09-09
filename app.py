@@ -4,18 +4,17 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 import tensorflow as tf
-from tensorflow.keras.models import Sequential  # type: ignore
-from tensorflow.keras.layers import Dense  # type: ignore
-from mlxtend.plotting import plot_decision_regions
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
 import matplotlib.pyplot as plt
 
 st.set_page_config(page_title="A Neural Network Playground")
 st.title("Neural Network Playground")
 
+# Fix for dataset URL concatenation
 def get_dataset(name_or_file):
-    # Base URL for raw content in GitHub repository
-    base_url = "https://github.com/moinuddinkhaja/nueral-network-project/tree/main/datasab"
-    
+    base_url = "https://raw.githubusercontent.com/moinuddinkhaja/nueral-network-project/main/datasab/"
+
     file_paths = {
         "ushape": "1.ushape.csv",
         "concentriccir1": "2.concentriccir1.csv",
@@ -27,7 +26,7 @@ def get_dataset(name_or_file):
         "twospirals": "8.twospirals.csv",
         "random": "9.random.csv"
     }
-    
+
     if name_or_file in file_paths:
         try:
             url = base_url + file_paths[name_or_file]
@@ -51,33 +50,35 @@ def get_dataset(name_or_file):
         st.error(f"Dataset name not recognized: {name_or_file}")
         return None, None
 
+# Model creation function
 def create_model(input_dim, learning_rate, activation, num_layers, num_neurons, regularization, reg_rate, problem_type):
     model = Sequential()
     for _ in range(num_layers):
         if regularization == "L1":
-            model.add(Dense(num_neurons, input_dim=input_dim, activation=activation, 
+            model.add(Dense(num_neurons, input_dim=input_dim, activation=activation,
                             kernel_regularizer=tf.keras.regularizers.l1(reg_rate)))
         elif regularization == "L2":
-            model.add(Dense(num_neurons, input_dim=input_dim, activation=activation, 
+            model.add(Dense(num_neurons, input_dim=input_dim, activation=activation,
                             kernel_regularizer=tf.keras.regularizers.l2(reg_rate)))
         elif regularization == "L1 & L2":
-            model.add(Dense(num_neurons, input_dim=input_dim, activation=activation, 
+            model.add(Dense(num_neurons, input_dim=input_dim, activation=activation,
                             kernel_regularizer=tf.keras.regularizers.l1_l2(l1=reg_rate, l2=reg_rate)))
         else:
             model.add(Dense(num_neurons, input_dim=input_dim, activation=activation))
         input_dim = num_neurons
-    
+
     if problem_type == "Classification":
-        model.add(Dense(1, activation="sigmoid"))  
+        model.add(Dense(1, activation="sigmoid"))
         model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate),
                       loss="binary_crossentropy", metrics=["accuracy"])
     else:
-        model.add(Dense(1)) 
+        model.add(Dense(1))
         model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate),
                       loss="mean_squared_error", metrics=["mse"])
-    
+
     return model
 
+# Sidebar settings
 st.sidebar.title("Neural Network Configuration")
 dataset_name = st.sidebar.selectbox("Select Dataset", ["ushape", "concentriccir1", "concentriccir2", "linearsep", "outlier", "overlap", "xor", "twospirals", "random"])
 problem_type = st.sidebar.selectbox("Problem Type", ["Classification", "Regression"])
@@ -92,11 +93,13 @@ epochs = st.sidebar.slider("Epochs", 1, 1000, 100)
 regularization = st.sidebar.selectbox("Regularization", ["None", "L1", "L2", "L1 & L2"])
 reg_rate = st.sidebar.slider("Regularization Rate", 0.0, 1.0, 0.0)
 
+# Submit button to start training
 if st.sidebar.button("Submit"):
     X, y = get_dataset(dataset_name)
     if X is not None and y is not None:
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=1-train_test_ratio, random_state=42)
-        
+
+        # Normalize features
         scaler = StandardScaler()
         X_train = scaler.fit_transform(X_train)
         X_test = scaler.transform(X_test)
@@ -110,11 +113,6 @@ if st.sidebar.button("Submit"):
         else:
             loss, mse = model.evaluate(X_test, y_test, verbose=0)
             st.write(f"Test Loss: {loss:.4f}, Test MSE: {mse:.4f}")
-
-        plt.figure(figsize=(10, 6))
-        plot_decision_regions(X_test, y_test.astype(np.int32), clf=model, legend=2)
-        plt.title(f"Decision Boundary for {dataset_name} Dataset")
-        st.pyplot(plt)
 
         # Plot training and validation loss
         plt.figure(figsize=(10, 6))
