@@ -222,13 +222,13 @@ if page == "Home":
     st.write("""
     Have questions or need assistance? Feel free to reach out to us at:
 
-    **Email:** [conan.chandu@gmail.com](mailto:conan.chandu@gmail.com)  
-    **Support Page:** [My Blog](https://medium.com/@conan.chandu)  
+    **Email:** [Mohameedkhajamoinuddin@gmail.com](Mohameedkhajamoinuddin@gmail.com)  
+    **Support Page:** [My Blog](https://medium.com/@moinuddinkhaja70)  
 
     Alternatively, you can also reach out via:
 
-    **LinkedIn:** [Chandrakanth Kunta](https://www.linkedin.com/in/chandrakanth-kunta-6405011bb/)  
-    **GitHub:** [Chandrakanth Kunta](https://github.com/chandrakanthkunta)  
+    **LinkedIn:** [Chandrakanth Kunta](https://www.linkedin.com/in/khaja-moinuddin-56776a2b3/)  
+    **GitHub:** [Chandrakanth Kunta](https://github.com/moinuddinkhaja)  
     """)
 
 elif page == "Neural Network Playground":
